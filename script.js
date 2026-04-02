@@ -17,30 +17,33 @@ function downloadImage(url) {
     img.src = url;
 
     img.onload = () => resolve(img);
-    img.onerror = () => reject(`Failed to load image: ${url}`);
+    img.onerror = () => reject(`Failed to load ${url}`);
   });
 }
 
 function downloadImages() {
+  if (loading) loading.style.display = "block";
+  if (errorDiv) errorDiv.textContent = "";
   output.innerHTML = "";
-  errorDiv.textContent = "";
-  loading.style.display = "block";
 
-  const promises = images.map(url => downloadImage(url));
+  const imageUrls = [
+    "https://picsum.photos/id/237/200/300",
+    "https://picsum.photos/id/238/200/300",
+    "https://picsum.photos/id/239/200/300"
+  ];
 
-  Promise.all(promises)
-    .then(imgs => {
-      loading.style.display = "none";
+  Promise.all(imageUrls.map(downloadImage))
+    .then(images => {
+      if (loading) loading.style.display = "none";
 
-      imgs.forEach(img => {
-        output.appendChild(img);
-      });
+      images.forEach(img => output.appendChild(img));
     })
     .catch(err => {
-      loading.style.display = "none";
-
-      errorDiv.textContent = err;
+      if (loading) loading.style.display = "none";
+      if (errorDiv) errorDiv.textContent = err;
     });
 }
 
-downloadImages();
+document
+  .getElementById("download-images-button")
+  .addEventListener("click", downloadImages);
